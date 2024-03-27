@@ -137,7 +137,7 @@ async def handle_lynx_pompy_vodyanye_button(callback_query: types.CallbackQuery)
 # Обработка нажатия кнопки "LYNX (свечи зажигания)"
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'lynx_svechi_zazhiganiya')
 async def handle_lynx_svechi_zazhiganiya_button(callback_query: types.CallbackQuery):
-    with open('LYNX (свечи зажигания).xlsx', 'rb') as file:
+    with open('LYNX (Свечи зажигания).xlsx', 'rb') as file:
         await bot.send_document(callback_query.from_user.id, file, caption="Информация о LYNX (свечи зажигания)")
 
 
