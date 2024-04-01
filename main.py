@@ -1,13 +1,16 @@
-import logging
+import logging  # Импорт модуля logging
+
 import time
-import asyncio
 from aiogram import Bot, Dispatcher, types
+import asyncio
+
+from aiogram.utils import exceptions
 
 # Устанавливаем уровень логгирования
 logging.basicConfig(level=logging.INFO)
 
 # Замените 'YOUR_TELEGRAM_BOT_TOKEN' на ваш токен, который получили у BotFather
-TOKEN = '6850987188:AAGaqkwWj092UNLpTsK1uoIRaeOBgR9tfVs'
+TOKEN = '7133328183:AAEbno9akd-k7WxQdK9k2uNomi5DYzlCrC0'
 
 # Создаем экземпляр бота
 bot = Bot(token=TOKEN)
@@ -24,7 +27,6 @@ def get_main_menu_keyboard():
     return keyboard
 
 
-# Функция, которая формирует клавиатуру с остальными кнопками
 def get_sub_menu_keyboard():
     keyboard = types.InlineKeyboardMarkup()
     keyboard.row(
@@ -57,6 +59,15 @@ def get_sub_menu_keyboard():
     return keyboard
 
 
+# Обработка нажатия кнопки "Подбор по авто"
+@dp.callback_query_handler(lambda callback_query: callback_query.data == 'auto_selection')
+async def handle_auto_selection_button(callback_query: types.CallbackQuery):
+    keyboard = get_auto_selection_keyboard()  # Получаем клавиатуру для подбора авто
+    await bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id,
+                                        message_id=callback_query.message.message_id,
+                                        reply_markup=keyboard)
+
+
 # Обработка нажатия кнопки "LYNXauto"
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'LYNXauto')
 async def handle_lynxauto_button(callback_query: types.CallbackQuery):
@@ -84,7 +95,7 @@ async def handle_lynxauto_button(callback_query: types.CallbackQuery):
     )
     keyboard.add(
         types.InlineKeyboardButton("LYNX (щётки стеклоочистителя)", callback_data="lynx_schetki_stekloochistitelya"),
-        types.InlineKeyboardButton("Выйти в меню", callback_data="menu")  # Добавляем кнопку "Меню"
+        types.InlineKeyboardButton("Меню", callback_data="menu")  # Добавляем кнопку "Меню"
     )
 
     # Заменяем предыдущую клавиатуру новой
@@ -189,7 +200,7 @@ async def handle_sufix_button(callback_query: types.CallbackQuery):
     keyboard.add(
         types.InlineKeyboardButton("SUFIX (ЩЕТКИ СТЕКЛООЧИСТИТЕЛЕЙ)", callback_data="sufix_schetki_stekloochistiteley"),
         types.InlineKeyboardButton("Товарные группы ТОП", callback_data="tovar_group"),
-        types.InlineKeyboardButton("Выйти в меню", callback_data="menu")  # Добавляем кнопку "Меню"
+        types.InlineKeyboardButton("Меню", callback_data="menu")  # Добавляем кнопку "Меню"
     )
 
     # Редактируем сообщение, заменяя текст и клавиатуру
@@ -262,18 +273,22 @@ async def handle_sufix_schetki_stekloochistiteley(callback_query: types.Callback
                                 caption="")
 
 
-# Обработка нажатия кнопки "MECAFILTER"
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'MECAFILTER')
 async def handle_mecafilter_button(callback_query: types.CallbackQuery):
     # Создаем клавиатуру с двумя кнопками
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(
+    keyboard.row(
         types.InlineKeyboardButton("MECAFILTER ТОП", callback_data="mecafilter_top"),
         types.InlineKeyboardButton("MECAFILTER TRUCK", callback_data="mecafilter_truck")
     )
+    keyboard.row(
+        types.InlineKeyboardButton("Меню", callback_data="menu")
+    )
 
-    # Отправляем сообщение с кнопками
-    await bot.send_message(callback_query.from_user.id, "MECAFILTER", reply_markup=keyboard)
+    # Редактируем старое сообщение, добавляя новую клавиатуру
+    await bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id,
+                                        message_id=callback_query.message.message_id,
+                                        reply_markup=keyboard)
 
 
 # Обработка нажатия кнопки "MECAFILTER ТОП"
@@ -292,15 +307,19 @@ async def handle_mecafilter_truck_button(callback_query: types.CallbackQuery):
         await bot.send_document(callback_query.from_user.id, file, caption="Файл MECAFILTER TRUCK")
 
 
-# Обработка нажатия кнопки "INKO"
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'INKO')
 async def handle_inko_button(callback_query: types.CallbackQuery):
-    # Создаем клавиатуру с кнопкой "INKO ТОП"
+    # Создаем клавиатуру с кнопкой "INKO ТОП" и кнопкой "Меню"
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(types.InlineKeyboardButton("INKO ТОП", callback_data="inko_top"))
+    keyboard.add(
+        types.InlineKeyboardButton("INKO ТОП", callback_data="inko_top"),
+        types.InlineKeyboardButton("Меню", callback_data="menu")
+    )
 
-    # Отправляем сообщение с кнопкой "INKO ТОП"
-    await bot.send_message(callback_query.from_user.id, "INKO", reply_markup=keyboard)
+    # Редактируем старое сообщение, добавляя новую клавиатуру
+    await bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id,
+                                        message_id=callback_query.message.message_id,
+                                        reply_markup=keyboard)
 
 
 # Обработка нажатия кнопки "INKO ТОП"
@@ -314,10 +333,20 @@ async def handle_inko_top_button(callback_query: types.CallbackQuery):
 # Обработка нажатия кнопки "JEENICE"
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'JEENICE')
 async def handle_jeenice_button(callback_query: types.CallbackQuery):
-    # Отправляем кнопку "JEENICE ТОП"
+    # Создаем клавиатуру с кнопкой "JEENICE ТОП" и кнопкой "Вернуться в меню"
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton("JEENICE ТОП", callback_data="jeenice_top"))
-    await bot.send_message(callback_query.from_user.id, "JEENICE", reply_markup=keyboard)
+    keyboard.add(types.InlineKeyboardButton("меню", callback_data="menu"))
+
+    # Если есть идентификатор старого сообщения, редактируем его
+    if callback_query.message:
+        await bot.edit_message_text(chat_id=callback_query.message.chat.id,
+                                    message_id=callback_query.message.message_id,
+                                    text="JEENICE",
+                                    reply_markup=keyboard)
+    else:
+        # Отправляем новое сообщение с кнопками
+        await bot.send_message(callback_query.from_user.id, "JEENICE", reply_markup=keyboard)
 
 
 # Обработка нажатия кнопки "JEENICE ТОП"
@@ -327,57 +356,82 @@ async def handle_jeenice_top_button(callback_query: types.CallbackQuery):
     with open('JEENICE ТОП.xlsx', 'rb') as file:
         await bot.send_document(callback_query.from_user.id, file, caption="")
 
+    # Создаем клавиатуру с кнопкой "Вернуться в меню"
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton("Меню", callback_data="menu"))
 
-# Обработка нажатия кнопки "DJB"
+    # Если есть идентификатор старого сообщения, редактируем его
+    if callback_query.message:
+        await bot.edit_message_reply_markup(chat_id=callback_query.message.chat.id,
+                                            message_id=callback_query.message.message_id,
+                                            reply_markup=keyboard)
+
+
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'DJB')
 async def handle_djb_button(callback_query: types.CallbackQuery):
-    # Отправляем кнопку "DJB ТОП"
+    # Создаем клавиатуру с кнопкой "DJB ТОП" и кнопкой "Меню"
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(types.InlineKeyboardButton("DJB ТОП", callback_data="djb_top"))
-    await bot.send_message(callback_query.from_user.id, "DJB", reply_markup=keyboard)
+    keyboard.add(
+        types.InlineKeyboardButton("DJB ТОП", callback_data="djb_top"),
+        types.InlineKeyboardButton("Меню", callback_data="menu")
+    )
+
+    # Редактируем старое сообщение, добавляя новую клавиатуру
+    await bot.edit_message_text(chat_id=callback_query.message.chat.id,
+                                message_id=callback_query.message.message_id,
+                                text="DJB",
+                                reply_markup=keyboard)
 
 
-# Обработка нажатия кнопки "DJB ТОП"
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'djb_top')
 async def handle_djb_top_button(callback_query: types.CallbackQuery):
-    # Отправляем файл
+    # Отправляем файл "DJB ТОП" и пустую подпись
     with open('DJB ТОП.xlsx', 'rb') as file:
         await bot.send_document(callback_query.from_user.id, file, caption="")
 
 
-# Обработка нажатия кнопки "G-AUTOPARTS"
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'G-AUTOPARTS')
 async def handle_g_autoparts_button(callback_query: types.CallbackQuery):
-    # Создаем клавиатуру с кнопкой "G-AUTOPARTS ТОП"
+    # Создаем клавиатуру с кнопкой "G-AUTOPARTS ТОП" и кнопкой "Меню"
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(types.InlineKeyboardButton("G-AUTOPARTS ТОП", callback_data="g_autoparts_top"))
-    # Отправляем сообщение с клавиатурой
-    await bot.send_message(callback_query.from_user.id, "Выберите G-AUTOPARTS ТОП:", reply_markup=keyboard)
+    keyboard.add(
+        types.InlineKeyboardButton("G-AUTOPARTS ТОП", callback_data="g_autoparts_top"),
+        types.InlineKeyboardButton("Меню", callback_data="menu")
+    )
 
-    # Обработка нажатия кнопки "G-AUTOPARTS ТОП"
-    @dp.callback_query_handler(lambda query: query.data == 'g_autoparts_top')
-    async def handle_g_autoparts_top_button(query: types.CallbackQuery):
-        # Отправляем файл
-        with open('G-AUTOPARTS ТОП.xlsx', 'rb') as file:
-            await bot.send_document(query.from_user.id, file, caption="G-AUTOPARTS ТОП")
+    # Редактируем старое сообщение, добавляя новую клавиатуру
+    await bot.edit_message_text(chat_id=callback_query.message.chat.id,
+                                message_id=callback_query.message.message_id,
+                                text="Выберите G-AUTOPARTS ТОП:",
+                                reply_markup=keyboard)
 
 
-# Обработка нажатия кнопки "Aplus"
+@dp.callback_query_handler(lambda callback_query: callback_query.data == 'g_autoparts_top')
+async def handle_g_autoparts_top_button(callback_query: types.CallbackQuery):
+    # Отправляем файл "G-AUTOPARTS ТОП" и пустую подпись
+    with open('G-AUTOPARTS ТОП.xlsx', 'rb') as file:
+        await bot.send_document(callback_query.from_user.id, file, caption="G-AUTOPARTS ТОП")
+
+
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'Aplus')
 async def handle_aplus_button(callback_query: types.CallbackQuery):
-    # Создаем клавиатуру с кнопкой "Aplus ТОП"
+    # Создаем клавиатуру с кнопкой "Aplus ТОП" и кнопкой "Меню"
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.row(
-        types.InlineKeyboardButton("Aplus ТОП", callback_data="aplus_top")
+    keyboard.add(
+        types.InlineKeyboardButton("Aplus ТОП", callback_data="aplus_top"),
+        types.InlineKeyboardButton("Меню", callback_data="menu")
     )
-    # Отправляем сообщение с кнопкой "Aplus ТОП"
-    await bot.send_message(callback_query.from_user.id, "Выберите:", reply_markup=keyboard)
+
+    # Редактируем старое сообщение, добавляя новую клавиатуру
+    await bot.edit_message_text(chat_id=callback_query.message.chat.id,
+                                message_id=callback_query.message.message_id,
+                                text="Выберите:",
+                                reply_markup=keyboard)
 
 
-# Обработка нажатия кнопки "Aplus ТОП"
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'aplus_top')
 async def handle_aplus_top_button(callback_query: types.CallbackQuery):
-    # Отправляем файл
+    # Отправляем файл "APlus ТОП" и пустую подпись
     with open('APlus ТОП.xlsx', 'rb') as file:
         await bot.send_document(callback_query.from_user.id, file, caption="")
 
@@ -396,7 +450,7 @@ def get_battery_selection_keyboard():
     keyboard.row(
         types.InlineKeyboardButton("BARTEX", callback_data="battery_bartex"),
         types.InlineKeyboardButton("LYNX", callback_data="battery_lynx"),
-        types.InlineKeyboardButton("Выйти в меню", callback_data="menu")  # Добавляем кнопку "Меню"
+        types.InlineKeyboardButton("Меню", callback_data="menu")  # Добавляем кнопку "Меню"
     )
     return keyboard
 
@@ -441,7 +495,7 @@ def get_auto_selection_keyboard():
         types.InlineKeyboardButton("Vesta седан с 2015", callback_data="vesta_sedan")
     )
     keyboard.row(
-        types.InlineKeyboardButton("Выйти в меню", callback_data="menu")  # Добавляем кнопку "Меню"
+        types.InlineKeyboardButton("Меню", callback_data="menu")  # Добавляем кнопку "Меню"
     )
     return keyboard
 
@@ -549,7 +603,7 @@ def get_oil_selection_keyboard():
     )
     keyboard.row(
         types.InlineKeyboardButton("CHEMPIOIL", callback_data="chempioil"),
-        types.InlineKeyboardButton("Выйти в меню", callback_data="menu")  # Добавляем кнопку "Меню"
+        types.InlineKeyboardButton("Меню", callback_data="menu")  # Добавляем кнопку "Меню"
     )
     return keyboard
 
@@ -568,7 +622,7 @@ async def handle_bardahl_button(callback_query: types.CallbackQuery):
         types.InlineKeyboardButton("Хим анализ", callback_data="bardahl_chemical_analysis")
     )
     keyboard.row(
-        types.InlineKeyboardButton("Выйти в меню", callback_data="menu"),  # Добавляем кнопку "Меню"
+        types.InlineKeyboardButton("Меню", callback_data="menu"),  # Добавляем кнопку "Меню"
     )
 
     # Отправляем сообщение с дополнительными кнопками
@@ -588,7 +642,7 @@ async def handle_ngn_button(callback_query: types.CallbackQuery):
         types.InlineKeyboardButton("Хим анализ", callback_data="himia_ngn")
     )
     keyboard.row(
-        types.InlineKeyboardButton("Выйти в меню", callback_data="menu"),  # Добавляем кнопку "Меню"
+        types.InlineKeyboardButton("Меню", callback_data="menu"),  # Добавляем кнопку "Меню"
     )
     await bot.send_message(callback_query.from_user.id, "Выберите дополнительные опции:", reply_markup=keyboard)
 
@@ -606,7 +660,7 @@ async def handle_pemco_button(callback_query: types.CallbackQuery):
         types.InlineKeyboardButton("Хим анализ", callback_data="pemco_chemical_analysis")
     )
     keyboard.row(
-        types.InlineKeyboardButton("Выйти в меню", callback_data="menu"),  # Добавляем кнопку "Меню"
+        types.InlineKeyboardButton("Меню", callback_data="menu"),  # Добавляем кнопку "Меню"
     )
     await bot.send_message(callback_query.from_user.id, "Выберите дополнительные опции:", reply_markup=keyboard)
 
@@ -624,7 +678,7 @@ async def handle_korson_button(callback_query: types.CallbackQuery):
         types.InlineKeyboardButton("Хим анализ", callback_data="korson_chemical_analysis")
     )
     keyboard.row(
-        types.InlineKeyboardButton("Выйти в меню", callback_data="menu"),  # Добавляем кнопку "Меню"
+        types.InlineKeyboardButton("Меню", callback_data="menu"),  # Добавляем кнопку "Меню"
     )
     await bot.send_message(callback_query.from_user.id, "Выберите дополнительные опции:", reply_markup=keyboard)
 
@@ -642,7 +696,7 @@ async def handle_chempioil_button(callback_query: types.CallbackQuery):
         types.InlineKeyboardButton("Хим анализ", callback_data="chempioil_chemical_analysis")
     )
     keyboard.row(
-        types.InlineKeyboardButton("Выйти в меню", callback_data="menu"),  # Добавляем кнопку "Меню"
+        types.InlineKeyboardButton("Меню", callback_data="menu"),  # Добавляем кнопку "Меню"
     )
     await bot.send_message(callback_query.from_user.id, "Выберите дополнительные опции:", reply_markup=keyboard)
 
@@ -874,12 +928,47 @@ async def send_welcome(message: types.Message):
                            reply_markup=get_main_menu_keyboard())
 
 
+# Список для хранения идентификаторов сообщений бота
+bot_messages = {}
+bot.get_messages = {}
+
+
+async def delete_bot_messages(user_id):
+    # Получаем список сообщений, отправленных ботом пользователю
+    messages = bot_messages.get(user_id, [])
+
+    # Удаляем каждое сообщение
+    for message_id in messages:
+        try:
+            message = await bot.get_message(user_id, message_id)
+            # Проверяем тип сообщения
+            if message:
+                if message.photo:
+                    for photo_size in message.photo:
+                        await bot.delete_message(user_id, photo_size.file_id)
+                elif message.document:
+                    await bot.delete_message(user_id, message.document.file_id)
+                elif message.audio:
+                    await bot.delete_message(user_id, message.audio.file_id)
+                # Добавьте другие типы файлов по аналогии, если необходимо
+                else:
+                    await bot.delete_message(user_id, message_id)
+        except exceptions.MessageCantBeDeleted:
+            pass  # Сообщение или файл не может быть удален, игнорируем
+
+    # Очищаем список сообщений пользователя
+    bot_messages[user_id] = []
+
+
 # Обработка нажатия кнопки "Меню"
 @dp.callback_query_handler(lambda callback_query: callback_query.data == 'menu')
 async def show_main_menu(callback_query: types.CallbackQuery):
-    # Отправляем сообщение с главным меню
-    await bot.edit_message_text("Выберите категорию:", callback_query.from_user.id, callback_query.message.message_id,
-                                reply_markup=get_sub_menu_keyboard())
+    # Удаляем все сообщения бота с пользователем
+    await delete_bot_messages(callback_query.from_user.id)
+
+    # Редактируем существующее сообщение с главным меню
+    await bot.edit_message_text(chat_id=callback_query.from_user.id, message_id=callback_query.message.message_id,
+                                text="Выберите категорию:", reply_markup=get_sub_menu_keyboard())
 
 
 # Обработка нажатия кнопки "Подбор на China auto"
