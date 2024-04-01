@@ -10,7 +10,7 @@ from aiogram.utils import exceptions
 logging.basicConfig(level=logging.INFO)
 
 # Замените 'YOUR_TELEGRAM_BOT_TOKEN' на ваш токен, который получили у BotFather
-TOKEN = '6850987188:AAG3B_ae9XWf4zA_27Bjp-LIcezGrRzsqsI'
+TOKEN = '6850987188:AAGaqkwWj092UNLpTsK1uoIRaeOBgR9tfVs'
 
 # Создаем экземпляр бота
 bot = Bot(token=TOKEN)
